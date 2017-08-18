@@ -1,0 +1,10 @@
+FROM golang AS plugin
+WORKDIR /go/src/github.com/qnib/docker-plugin-authz
+COPY . ./
+RUN CGO_ENABLED=0 go build -tags netgo -o docker-plugin-authz
+RUN mkdir -p /run/docker
+
+FROM scratch
+COPY --from=plugin /go/src/github.com/qnib/docker-plugin-authz/docker-plugin-authz /
+COPY --from=plugin /run/docker /run/docker
+ENTRYPOINT ["/docker-plugin-authz"]
